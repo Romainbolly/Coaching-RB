@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F3A5F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fiche Coach">
+<title>Suivi clients — Coaching</title>
+<!-- Google Identity Services + Google API client (nécessitent une connexion internet) -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<style>
+  :root{
+    --navy:#1F3A5F; --navy-700:#16314f; --orange:#E8772E; --orange-soft:#fbe8d8;
+    --green:#2E8B57; --ink:#1c2530; --muted:#5b6b7c; --line:#d8dee6;
+    --bg:#eef1f5; --card:#ffffff; --shade:#f5f7fa; --blue-soft:#dce6f1;
+    --radius:14px; --tap:#fff3ea;
+    --sans:'Segoe UI',Roboto,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans); color:var(--ink); background:var(--bg);
+    font-size:17px; line-height:1.4; -webkit-text-size-adjust:100%;
+    padding-bottom:90px;
+  }
+  /* ---------- top bar ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg,var(--navy),var(--navy-700));
+    color:#fff; padding:env(safe-area-inset-top) 0 0 0;
+    box-shadow:0 2px 10px rgba(0,0,0,.18);
+  }
+  .bar{display:flex; align-items:center; gap:12px; padding:12px 16px;}
+  .bar h1{font-size:18px; margin:0; font-weight:700; letter-spacing:.2px; flex:1;}
+  .bar h1 small{display:block; font-weight:400; font-size:12px; color:#b9c6d6; letter-spacing:.3px;}
+  .bar .logo{
+    width:38px;height:38px;border-radius:10px;flex:none;
+    background:var(--orange); display:grid;place-items:center; font-weight:800; font-size:15px;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);
+  }
+  .btn{
+    appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;
+    border-radius:11px;padding:11px 15px;font-size:14px; display:inline-flex;align-items:center;gap:7px;
+    transition:transform .05s ease, filter .15s ease; white-space:nowrap;
+  }
+  .btn:active{transform:scale(.95);}
+  .btn-ghost{background:rgba(255,255,255,.12); color:#fff;}
+  .btn-ghost:active{background:rgba(255,255,255,.22);}
+  /* progress */
+  .progress{height:4px;background:rgba(255,255,255,.18);}
+  .progress > i{display:block;height:100%;width:0;background:var(--orange);transition:width .3s ease;}
+
+  /* ---------- tab nav ---------- */
+  nav.tabs{
+    display:flex; gap:6px; overflow-x:auto; padding:9px 12px;
+    background:var(--navy-700); scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    flex:none;border:none;background:rgba(255,255,255,.08);color:#cdd8e4;
+    border-radius:20px;padding:8px 15px;font-size:13.5px;font-weight:600;font-family:inherit;
+    cursor:pointer;transition:.15s; display:flex;align-items:center;gap:6px;
+  }
+  nav.tabs button .n{
+    background:rgba(255,255,255,.18);border-radius:50%;width:20px;height:20px;
+    display:grid;place-items:center;font-size:11px;font-weight:800;
+  }
+  nav.tabs button.active{background:var(--orange);color:#fff;}
+  nav.tabs button.active .n{background:rgba(0,0,0,.18);}
+
+  /* ---------- layout ---------- */
+  main{max-width:880px;margin:0 auto;padding:16px 14px;}
+  .step{display:none; animation:fade .25s ease;}
+  .step.show{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .card{
+    background:var(--card);border-radius:var(--radius);padding:16px 16px 18px;
+    box-shadow:0 1px 3px rgba(20,40,70,.08), 0 6px 18px rgba(20,40,70,.05);
+    margin-bottom:16px; border:1px solid #e8edf3;
+  }
+  .sec-h{display:flex;align-items:center;gap:11px;margin:0 0 14px;}
+  .sec-h .badge{
+    background:var(--orange);color:#fff;font-weight:800;border-radius:9px;
+    min-width:30px;height:30px;padding:0 8px;display:grid;place-items:center;font-size:15px;flex:none;
+  }
+  .sec-h h2{font-size:18px;margin:0;color:var(--navy);font-weight:700;flex:1;}
+  .sub{color:var(--muted);font-size:13.5px;margin:-6px 0 14px;}
+
+  label.fld{display:block;margin:0 0 13px;}
+  label.fld > span{display:block;font-size:13.5px;color:var(--muted);font-weight:600;margin-bottom:5px;}
+  input[type=text],input[type=tel],input[type=email],input[type=date],input[type=number],textarea,select{
+    width:100%;font-family:inherit;font-size:16.5px;color:var(--ink);
+    border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff;
+    transition:border-color .15s, box-shadow .15s; -webkit-appearance:none;appearance:none;
+  }
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);}
+  textarea{resize:vertical;min-height:74px;line-height:1.45;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 14px;}
+  @media (max-width:560px){.row,.row-3{grid-template-columns:1fr;}}
+
+  /* tappable chips (checkbox / radio) */
+  .chips{display:grid;gap:9px;}
+  .chips.c2{grid-template-columns:1fr 1fr;}
+  .chips.c3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:560px){.chips.c3{grid-template-columns:1fr 1fr;} }
+  @media (max-width:420px){.chips.c2,.chips.c3{grid-template-columns:1fr;} }
+  .chip{
+    display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none;
+    border:1.5px solid var(--line);border-radius:12px;padding:13px 13px;background:#fff;
+    font-size:15.5px;transition:.12s; min-height:50px;
+  }
+  .chip:active{transform:scale(.98);}
+  .chip .box{
+    width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;
+    display:grid;place-items:center;transition:.12s;background:#fff;
+  }
+  .chip .box svg{width:15px;height:15px;opacity:0;transform:scale(.5);transition:.12s;}
+  .chip input{position:absolute;opacity:0;pointer-events:none;}
+  .chip.on{border-color:var(--orange);background:var(--tap);}
+  .chip.on .box{background:var(--orange);border-color:var(--orange);}
+  .chip.on .box svg{opacity:1;transform:scale(1);}
+  .chip.flag.on{border-color:#d8542a;background:#fdeee7;}
+  .chip.flag.on .box{background:#d8542a;border-color:#d8542a;}
+
+  /* segmented (single choice inline) */
+  .seg{display:inline-flex;flex-wrap:wrap;gap:8px;}
+  .seg .opt{
+    border:1.5px solid var(--line);border-radius:11px;padding:11px 16px;cursor:pointer;
+    font-size:15px;font-weight:600;background:#fff;transition:.12s;min-height:46px;display:flex;align-items:center;
+  }
+  .seg .opt:active{transform:scale(.97);}
+  .seg .opt.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .seg input{display:none;}
+
+  /* sliders /10 */
+  .scale{margin:4px 0 16px;}
+  .scale .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .scale .top b{color:var(--navy);}
+  .scale .val{font-size:22px;font-weight:800;color:var(--orange);min-width:54px;text-align:right;}
+  input[type=range]{width:100%;-webkit-appearance:none;height:30px;background:transparent;}
+  input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--orange) var(--p,50%),var(--line) var(--p,50%));}
+  input[type=range]::-moz-range-track{height:8px;border-radius:8px;background:var(--line);}
+  input[type=range]::-moz-range-progress{height:8px;border-radius:8px;background:var(--orange);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--orange);margin-top:-11px;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--orange);box-shadow:0 2px 6px rgba(0,0,0,.2);}
+
+  .notice{
+    background:var(--blue-soft);border-left:5px solid var(--orange);border-radius:0 10px 10px 0;
+    padding:12px 14px;font-size:14px;color:var(--navy);margin:6px 0 4px;font-style:italic;
+  }
+  .sec-divider{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;display:flex;align-items:center;gap:9px;}
+  .sec-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  /* injury / movement repeat tables → cards */
+  .zonecard{border:1px solid #e6ebf1;border-radius:12px;padding:12px;margin-bottom:11px;background:var(--shade);}
+  .zonecard .zh{font-weight:700;color:var(--navy);margin-bottom:9px;font-size:15px;}
+
+  /* week plan */
+  .week{border:1px solid #e6ebf1;border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .week .wh{background:var(--navy);color:#fff;font-weight:700;padding:9px 13px;font-size:15px;}
+  .week .wb{padding:12px;}
+
+  /* bottom nav bar */
+  .footnav{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:#fff;border-top:1px solid var(--line);
+    display:flex;gap:10px;padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+    box-shadow:0 -2px 12px rgba(20,40,70,.08);
+  }
+  .footnav .btn{flex:1;justify-content:center;font-size:15.5px;padding:14px;}
+  .btn-prev{background:var(--shade);color:var(--navy);border:1.5px solid var(--line);}
+  .btn-next{background:var(--orange);color:#fff;}
+  .btn-next:disabled{opacity:1;}
+  .saved-dot{font-size:12px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px;justify-content:center;}
+
+  /* clients drawer */
+  .overlay{position:fixed;inset:0;background:rgba(15,25,40,.55);z-index:80;display:none;}
+  .overlay.show{display:block;}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:min(420px,90vw);background:var(--bg);z-index:90;
+    transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;
+    box-shadow:-4px 0 24px rgba(0,0,0,.2);
+  }
+  .drawer.show{transform:none;}
+  .drawer .dh{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;align-items:center;gap:10px;}
+  .drawer .dh h3{margin:0;font-size:17px;flex:1;}
+  .drawer .db{padding:14px;overflow:auto;flex:1;}
+  .clientitem{
+    background:#fff;border:1px solid #e6ebf1;border-radius:12px;padding:13px 14px;margin-bottom:10px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .clientitem .ci-main{flex:1;min-width:0;cursor:pointer;}
+  .clientitem .ci-name{font-weight:700;color:var(--navy);font-size:15.5px;}
+  .clientitem .ci-meta{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .clientitem .ci-del{
+    border:none;background:#fdeeee;color:#c0392b;border-radius:9px;width:38px;height:38px;flex:none;
+    font-size:17px;cursor:pointer;
+  }
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px;}
+
+  .toast{
+    position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+    background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
+    z-index:200;opacity:0;transition:.25s;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- home / dashboard ---------- */
+  .home{max-width:880px;margin:0 auto;padding:18px 14px 30px;}
+  .hero{
+    background:linear-gradient(135deg,var(--navy),#27496f);color:#fff;border-radius:18px;
+    padding:22px 20px;margin-bottom:18px;box-shadow:0 8px 24px rgba(20,40,70,.18);
+    position:relative;overflow:hidden;
+  }
+  .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(232,119,46,.25);}
+  .hero h2{margin:0 0 4px;font-size:22px;}
+  .hero p{margin:0;color:#cdd8e4;font-size:14px;}
+  .stats{display:flex;gap:12px;margin-top:18px;position:relative;z-index:1;}
+  .stat{background:rgba(255,255,255,.12);border-radius:13px;padding:12px 16px;flex:1;}
+  .stat b{display:block;font-size:26px;font-weight:800;line-height:1;}
+  .stat span{font-size:12px;color:#cdd8e4;}
+  .home-actions{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .home-actions .btn{flex:1;min-width:150px;justify-content:center;padding:15px;font-size:15.5px;}
+  .btn-primary{background:var(--orange);color:#fff;box-shadow:0 4px 12px rgba(232,119,46,.3);}
+  .btn-soft{background:#fff;color:var(--navy);border:1.5px solid var(--line);}
+  .search{position:relative;margin-bottom:14px;}
+  .search input{width:100%;font-size:16px;border:1.5px solid var(--line);border-radius:12px;padding:13px 13px 13px 44px;background:#fff;font-family:inherit;}
+  .search input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);}
+  .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--muted);}
+  .home-list{display:grid;gap:11px;}
+  .fcard{
+    background:#fff;border:1px solid #e6ebf1;border-radius:14px;padding:0;overflow:hidden;
+    display:flex;align-items:stretch;box-shadow:0 1px 3px rgba(20,40,70,.06);transition:.12s;
+  }
+  .fcard:active{transform:scale(.99);}
+  .fcard .accent{width:6px;flex:none;background:var(--orange);}
+  .fcard .fc-main{flex:1;min-width:0;cursor:pointer;padding:14px 15px;}
+  .fcard .fc-name{font-weight:700;color:var(--navy);font-size:16.5px;}
+  .fcard .fc-meta{font-size:12.5px;color:var(--muted);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+  .fcard .fc-meta .tag{background:var(--shade);border-radius:6px;padding:2px 8px;color:var(--navy);font-weight:600;}
+  .fcard .fc-acts{display:flex;align-items:center;padding-right:10px;gap:6px;}
+  .fcard .ic{border:none;background:var(--shade);border-radius:10px;width:42px;height:42px;font-size:17px;cursor:pointer;color:var(--navy);}
+  .fcard .ic.del{background:#fdeeee;color:#c0392b;}
+  .home .empty{background:#fff;border:1px dashed var(--line);border-radius:14px;}
+  body.on-home header .progress,body.on-home header nav.tabs,body.on-home .footnav{display:none;}
+  body.on-detail header .progress,body.on-detail header nav.tabs,body.on-detail .footnav{display:none;}
+  .view{display:none;} .view.show{display:block;}
+  input[type=file]{display:none;}
+
+  /* ---------- Google connect ---------- */
+  .gbar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e6ebf1;border-radius:13px;padding:11px 14px;margin-bottom:16px;}
+  .gbar .gdot{width:11px;height:11px;border-radius:50%;background:#c0392b;flex:none;}
+  .gbar.ok .gdot{background:var(--green);}
+  .gbar .gtxt{flex:1;font-size:13.5px;color:var(--muted);}
+  .gbar .gtxt b{color:var(--ink);display:block;font-size:14px;}
+  .gbtn{border:none;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;background:var(--navy);color:#fff;}
+  .gbtn.alt{background:var(--shade);color:var(--navy);border:1.5px solid var(--line);}
+
+  /* ---------- detail / séances ---------- */
+  .detail{max-width:880px;margin:0 auto;padding:18px 14px 30px;}
+  .dhead{background:linear-gradient(135deg,var(--navy),#27496f);color:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 8px 24px rgba(20,40,70,.18);}
+  .dhead h2{margin:0 0 3px;font-size:21px;}
+  .dhead .dsub{color:#cdd8e4;font-size:13.5px;}
+  .dhead .dstats{display:flex;gap:12px;margin-top:16px;}
+  .dhead .dstat{background:rgba(255,255,255,.12);border-radius:12px;padding:11px 14px;flex:1;}
+  .dhead .dstat b{display:block;font-size:22px;font-weight:800;line-height:1;}
+  .dhead .dstat span{font-size:11.5px;color:#cdd8e4;}
+  .dtabs{display:flex;gap:8px;margin-bottom:16px;}
+  .dtabs button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-weight:700;font-size:14px;color:var(--navy);cursor:pointer;font-family:inherit;}
+  .dtabs button.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .dpane{display:none;} .dpane.on{display:block;}
+  .sess{background:#fff;border:1px solid #e6ebf1;border-radius:14px;padding:14px 15px;margin-bottom:11px;box-shadow:0 1px 3px rgba(20,40,70,.06);position:relative;}
+  .sess .sdate{font-weight:800;color:var(--navy);font-size:15px;}
+  .sess .smeta{font-size:13px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .pill{border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:700;}
+  .pill.ok{background:#e4f3ea;color:var(--green);} .pill.no{background:#fdeeee;color:#c0392b;}
+  .pill.src{background:#eaf0f7;color:var(--navy);}
+  .pill.rpe{background:var(--orange-soft);color:#b85e1e;}
+  .sess .snote{font-size:13.5px;color:var(--ink);margin-top:8px;white-space:pre-wrap;}
+  .sess .sdel{position:absolute;top:12px;right:12px;border:none;background:#fdeeee;color:#c0392b;border-radius:9px;width:34px;height:34px;cursor:pointer;font-size:15px;}
+  .gcal{border-left:4px solid #4285F4 !important;}
+  .addbtn{width:100%;border:none;border-radius:13px;padding:15px;background:var(--orange);color:#fff;font-weight:700;font-size:15.5px;cursor:pointer;font-family:inherit;margin-bottom:14px;box-shadow:0 4px 12px rgba(232,119,46,.3);}
+  .miniform{background:#fff;border:1px solid #e6ebf1;border-radius:14px;padding:15px;margin-bottom:16px;}
+  .miniform h4{margin:0 0 12px;color:var(--navy);font-size:16px;}
+  .gsync-note{font-size:12.5px;color:var(--muted);background:#eaf0f7;border-radius:10px;padding:10px 12px;margin-top:4px;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions .btn{flex:1;justify-content:center;}
+
+  /* ---------- print ---------- */
+  @media print{
+    @page{size:A4;margin:14mm;}
+    header,nav.tabs,.footnav,.overlay,.drawer,.toast,.no-print{display:none !important;}
+    body{background:#fff;padding:0;font-size:11.5px;}
+    main{max-width:none;padding:0;}
+    .step{display:block !important;page-break-inside:auto;}
+    .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;margin-bottom:10px;padding:10px 12px;}
+    .print-title{display:block !important;}
+    .chip,.seg .opt,.zonecard,.week{break-inside:avoid;}
+    .chip{padding:6px 9px;min-height:0;}
+    .chip .box{width:16px;height:16px;}
+    input,textarea,select{border:1px solid #bbb;}
+    textarea{min-height:0;}
+  }
+  .print-title{display:none;text-align:center;margin-bottom:14px;}
+  .print-title h1{color:var(--navy);margin:0 0 2px;font-size:20px;}
+  .print-title p{color:var(--orange);margin:0;font-size:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo">RC</div>
+    <h1 id="appTitle">Mes fiches<small id="curClient">Coaching premier RDV</small></h1>
+    <button class="btn btn-ghost" id="btnHome" aria-label="Accueil" style="display:none">⌂ Accueil</button>
+    <button class="btn btn-ghost" id="btnPrint" aria-label="Exporter PDF" style="display:none">⤓ PDF</button>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+
+<!-- ====== ÉCRAN D'ACCUEIL ====== -->
+<section class="home view show" id="home">
+  <div class="hero">
+    <h2>Bonjour 👋</h2>
+    <p>Gère ici toutes tes fiches de premier rendez-vous, hors connexion.</p>
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b><span>fiche(s) enregistrée(s)</span></div>
+      <div class="stat"><b id="statWeek">0</b><span>cette semaine</span></div>
+    </div>
+  </div>
+  <div class="gbar" id="gbar">
+    <span class="gdot"></span>
+    <div class="gtxt"><b id="gstate">Google Agenda non connecté</b><span id="ghint">Connecte-toi pour synchroniser les séances.</span></div>
+    <button class="gbtn" id="btnGoogle">Connexion Google</button>
+  </div>
+  <div class="home-actions">
+    <button class="btn btn-primary" id="btnNewHome">+ Nouvelle fiche</button>
+    <button class="btn btn-soft" id="btnExport">⤴ Exporter (sauvegarde)</button>
+    <button class="btn btn-soft" id="btnImport">⤵ Importer</button>
+    <input type="file" id="fileImport" accept="application/json,.json">
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input type="text" id="searchBox" placeholder="Rechercher une fiche par nom…">
+  </div>
+  <div class="home-list" id="homeList"></div>
+</section>
+
+<!-- ====== VUE CLIENT / SUIVI SÉANCES ====== -->
+<section class="detail view" id="detail">
+  <div class="dhead">
+    <h2 id="dName">Client</h2>
+    <div class="dsub" id="dSub">Suivi des séances</div>
+    <div class="dstats">
+      <div class="dstat"><b id="dCount">0</b><span>séances</span></div>
+      <div class="dstat"><b id="dLast">—</b><span>dernière séance</span></div>
+      <div class="dstat"><b id="dNext">—</b><span>prochaine</span></div>
+    </div>
+  </div>
+  <div class="dtabs">
+    <button data-dtab="seances" class="on">Séances</button>
+    <button data-dtab="fiche">Fiche bilan</button>
+  </div>
+  <div class="dpane on" id="paneSeances">
+    <button class="addbtn" id="btnAddSession">+ Nouvelle séance</button>
+    <div id="sessionForm"></div>
+    <div id="sessionList"></div>
+  </div>
+  <div class="dpane" id="paneFiche">
+    <button class="addbtn" id="btnOpenFiche" style="background:var(--navy)">✎ Ouvrir / modifier la fiche bilan</button>
+    <div class="gsync-note">La fiche bilan complète (santé, douleurs, plan 4 semaines…) reste accessible et imprimable en PDF.</div>
+  </div>
+</section>
+
+<!-- ====== VUE FORMULAIRE ====== -->
+<main id="form" class="view">
+  <div class="print-title">
+    <h1>Fiche de premier rendez-vous</h1>
+    <p>Bilan initial &amp; plan d'action — Coaching sportif / Personal training</p>
+  </div>
+  <!-- steps injected by JS -->
+</main>
+
+<div class="footnav no-print">
+  <button class="btn btn-prev" id="prev">‹ Précédent</button>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+    <div class="saved-dot" id="savedDot">✓ Enregistré sur la tablette</div>
+  </div>
+  <button class="btn btn-next" id="next">Suivant ›</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ⚙️ CONFIGURATION — À PERSONNALISER (voir guide d'installation)
+   ============================================================ */
+const CONFIG = {
+  // Colle ici ton "ID client OAuth" obtenu sur Google Cloud Console.
+  // Tant qu'il vaut "", l'appli fonctionne en mode hors-ligne sans agenda.
+  GOOGLE_CLIENT_ID: "",
+  // Durée par défaut d'une séance créée dans l'agenda (minutes)
+  DEFAULT_DURATION: 60,
+  // Mot-clé ajouté aux événements créés, pour les retrouver dans l'agenda
+  EVENT_TAG: "[Coaching]"
+};
+const GCAL_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+
+/* ============================================================
+   Données du formulaire (structure des étapes)
+   ============================================================ */
+const CHECK = `<span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>`;
+
+const STEPS = [
+  { id:"express", n:"⚡", label:"Express", title:"Fiche express", badge:"⚡",
+    sub:"Repères rapides à compléter en quelques minutes.", blocks:[
+    {type:"fields", items:[
+      ["nom","Nom / Prénom","text"],["date","Date","date"],
+      ["age","Âge","number"],["tel","Téléphone","tel"],
+      ["prof","Profession","text"],["urg","Contact d'urgence","text"],
+    ]},
+    {type:"divider", t:"Motif & objectif"},
+    {type:"checks", name:"motif", cols:3, items:[
+      "Remise en forme","Perte de poids","Prise de muscle","Tonification","Reprise du sport",
+      "Réathlétisation","Amélioration cardio","Mobilité / souplesse","Bien-être / santé",
+      "Préparation physique","Objectif sportif","Autre"]},
+    {type:"field", k:"obj_phrase", label:"Objectif principal en une phrase", input:"textarea"},
+    {type:"row3", items:[["echeance","Échéance","text"],["mot_exp","Motivation /10","range"],["conf_exp","Confiance /10","range"]]},
+    {type:"divider", t:"Sécurité — signaux d'alerte"},
+    {type:"checks", name:"flags", cols:2, flag:true, items:[
+      "Problème cardiaque","Douleur poitrine à l'effort","Malaise / vertige","Hypertension",
+      "Diabète","Asthme / respiratoire","Médicaments","Opération récente",
+      "Grossesse / post-partum","Avis médical défavorable"]},
+    {type:"notice", t:"Si une case est cochée ou en cas de doute : avis médical avant de commencer ou d'intensifier l'activité physique."},
+    {type:"field", k:"doul_exp", label:"Douleurs / blessures connues", input:"textarea"},
+    {type:"divider", t:"Pratique & disponibilités"},
+    {type:"row", items:[["seances_exp","Séances / semaine","text"],["duree_exp","Durée idéale","text"]]},
+    {type:"row", items:[["jours_exp","Jours préférés","text"],["horaires_exp","Horaires préférés","text"]]},
+    {type:"seg", k:"accomp_exp", label:"Accompagnement", opts:["Individuel","Duo","Autonome","Mixte"]},
+    {type:"divider", t:"Première impression du coach"},
+    {type:"seg", k:"niveau_exp", label:"Niveau", opts:["Débutant","Intermédiaire","Avancé"]},
+    {type:"seg", k:"fiche_complete", label:"Fiche complète à prévoir", opts:["Oui","Non"]},
+    {type:"field", k:"vigilance_exp", label:"Points de vigilance / prochaine étape", input:"textarea"},
+  ]},
+
+  { id:"infos", n:"1", label:"Client", title:"Informations générales", badge:"1", blocks:[
+    {type:"fields", items:[
+      ["i_nom","Nom","text"],["i_prenom","Prénom","text"],
+      ["i_naiss","Date de naissance","date"],["i_age","Âge","number"],
+      ["i_tel","Téléphone","tel"],["i_email","Email","email"],
+      ["i_prof","Profession","text"],["i_rdv","Date du 1er RDV","date"],
+      ["i_urg","Contact d'urgence","text"],["i_urgtel","Tél. contact urgence","tel"],
+    ]},
+  ]},
+
+  { id:"objectif", n:"2", label:"Objectif", title:"Objectif principal", badge:"2", blocks:[
+    {type:"field", k:"o_principal", label:"Objectif principal", input:"textarea"},
+    {type:"field", k:"o_secondaire", label:"Objectifs secondaires", input:"textarea"},
+    {type:"row", items:[["o_echeance","Échéance éventuelle","text"],["o_motiv","Motivation du client","text"]]},
+    {type:"field", k:"o_freins", label:"Freins ou difficultés possibles", input:"textarea"},
+    {type:"scale", k:"o_mot10", label:"Niveau de motivation"},
+    {type:"scale", k:"o_conf10", label:"Niveau de confiance"},
+  ]},
+
+  { id:"histo", n:"3", label:"Historique", title:"Historique sportif", badge:"3", blocks:[
+    {type:"row", items:[["h_actuelle","Activité physique actuelle","text"],["h_freq","Fréquence actuelle","text"]]},
+    {type:"field", k:"h_passe", label:"Sports pratiqués dans le passé", input:"textarea"},
+    {type:"row", items:[["h_salle","Expérience en salle de sport","text"],["h_coach","Expérience avec un coach","text"]]},
+    {type:"row", items:[["h_aime","Exercices appréciés","text"],["h_aimepas","Exercices moins appréciés","text"]]},
+    {type:"field", k:"h_arret", label:"Périodes d'arrêt ou reprise récente", input:"textarea"},
+    {type:"field", k:"h_rem", label:"Remarques importantes", input:"textarea"},
+  ]},
+
+  { id:"sante", n:"4", label:"Santé", title:"Santé & sécurité", badge:"4",
+    sub:"Cocher selon les réponses du client.", blocks:[
+    {type:"yesno", name:"sante", items:[
+      "Problème cardiaque connu","Douleur dans la poitrine à l'effort","Malaise, vertige ou perte de connaissance",
+      "Hypertension","Diabète","Asthme ou problème respiratoire","Prise de médicaments","Opération récente",
+      "Maladie ou traitement en cours","Médecin ayant déconseillé certains efforts","Grossesse ou post-partum récent",
+      "Autre information médicale importante"]},
+    {type:"notice", t:"En cas de réponse positive à certaines questions ou de doute, un avis médical pourra être demandé avant de commencer ou d'intensifier l'activité physique."},
+    {type:"field", k:"s_precisions", label:"Précisions / remarques du coach", input:"textarea"},
+  ]},
+
+  { id:"douleurs", n:"5", label:"Douleurs", title:"Douleurs & limitations", badge:"5",
+    sub:"Renseigner les zones concernées. Intensité de 0 à 10.", blocks:[
+    {type:"zones", name:"zone", items:["Cou","Épaules","Dos","Hanches","Genoux","Chevilles","Autre"]},
+  ]},
+
+  { id:"vie", n:"6", label:"Mode de vie", title:"Mode de vie", badge:"6", blocks:[
+    {type:"row3", items:[["v_sommeil","Sommeil / nuit","text"],["v_qualite","Qualité sommeil","text"],["v_stress","Niveau de stress","text"]]},
+    {type:"seg", k:"v_travail", label:"Type de travail", opts:["Assis","Debout","Physique"]},
+    {type:"row", items:[["v_quotidien","Activité quotidienne","text"],["v_alim","Alimentation générale","text"]]},
+    {type:"row", items:[["v_hydra","Hydratation","text"],["v_tabac","Tabac / alcool","text"]]},
+    {type:"field", k:"v_energie", label:"Énergie générale dans la journée", input:"text"},
+    {type:"field", k:"v_rem", label:"Remarques", input:"textarea"},
+  ]},
+
+  { id:"orga", n:"7", label:"Organisation", title:"Organisation pratique", badge:"7", blocks:[
+    {type:"row", items:[["g_seances","Séances / semaine","text"],["g_duree","Durée idéale","text"]]},
+    {type:"row", items:[["g_jours","Jours préférés","text"],["g_horaires","Horaires préférés","text"]]},
+    {type:"seg", k:"g_accomp", label:"Type d'accompagnement", opts:["Individuel","Duo","Programme autonome","Suivi mixte"]},
+    {type:"seg", k:"g_encadre", label:"Préférence d'encadrement", opts:["Très accompagné","Semi-autonome","Autonome"]},
+    {type:"field", k:"g_contraintes", label:"Contraintes horaires", input:"text"},
+    {type:"field", k:"g_autonomie", label:"Niveau d'autonomie du client", input:"text"},
+  ]},
+
+  { id:"bilan", n:"8", label:"Bilan", title:"Bilan de départ", badge:"8",
+    sub:"Complété par le coach. Mesures uniquement si utiles et acceptées.", blocks:[
+    {type:"row", items:[["b_taille","Taille","text"],["b_poids","Poids (si accepté)","text"]]},
+    {type:"row", items:[["b_taille2","Tour de taille (si utile)","text"],["b_fc","FC au repos (si mesurée)","text"]]},
+    {type:"divider", t:"Évaluation qualitative"},
+    {type:"row", items:[["b_cardio","Niveau cardio estimé","text"],["b_force","Niveau de force estimé","text"]]},
+    {type:"row", items:[["b_mobil","Mobilité générale","text"],["b_equil","Équilibre","text"]]},
+    {type:"row", items:[["b_gain","Gainage","text"],["b_coord","Coordination","text"]]},
+    {type:"row", items:[["b_posture","Posture générale","text"],["b_resp","Respiration","text"]]},
+    {type:"field", k:"b_rem", label:"Remarques générales du coach", input:"textarea"},
+  ]},
+
+  { id:"mouv", n:"9", label:"Mouvements", title:"Observations mouvements", badge:"9",
+    sub:"Tests à adapter selon l'âge, le niveau et l'état de santé.", blocks:[
+    {type:"moves", name:"mv", items:[
+      "Squat poids du corps","Fente / demi-fente","Gainage adapté","Équilibre une jambe",
+      "Mobilité épaules","Mobilité hanches","Test cardio léger","Marche / posture"]},
+  ]},
+
+  { id:"synthese", n:"10", label:"Synthèse", title:"Synthèse coach", badge:"10", blocks:[
+    {type:"seg", k:"y_niveau", label:"Niveau actuel", opts:["Débutant","Intermédiaire","Avancé"]},
+    {type:"field", k:"y_profil", label:"Profil général du client", input:"textarea"},
+    {type:"row", items:[["y_prio","Priorité n°1","text"],["y_type","Type de séance recommandé","text"]]},
+    {type:"row", items:[["y_forts","Points forts","text"],["y_faibles","Points faibles","text"]]},
+    {type:"field", k:"y_vigilance", label:"Points de vigilance", input:"textarea"},
+    {type:"row", items:[["y_privil","Exercices à privilégier","text"],["y_eviter","Exercices à éviter temporairement","text"]]},
+    {type:"row", items:[["y_freq","Fréquence conseillée","text"],["y_obj4","Objectif des 4 premières semaines","text"]]},
+  ]},
+
+  { id:"plan", n:"11", label:"Plan", title:"Plan d'action — 4 semaines", badge:"11", blocks:[
+    {type:"weeks", name:"w", items:["Semaine 1","Semaine 2","Semaine 3","Semaine 4"]},
+  ]},
+
+  { id:"consent", n:"12", label:"Consentement", title:"Consentement & confidentialité", badge:"12", blocks:[
+    {type:"notice", t:"Le client confirme avoir transmis les informations utiles concernant son état de santé, ses douleurs, blessures ou limitations connues. Il s'engage à signaler toute douleur, gêne ou changement de situation pendant l'accompagnement. Les informations recueillies sont utilisées uniquement dans le cadre du suivi sportif et restent confidentielles."},
+    {type:"row", items:[["c_date","Date","date"],["c_lieu","Lieu","text"]]},
+    {type:"check_single", k:"c_accord", label:"Le client a pris connaissance et donne son accord"},
+    {type:"field", k:"c_sign", label:"Nom pour signature (client)", input:"text"},
+  ]},
+];
+
+/* ============================================================
+   Rendu des étapes
+   ============================================================ */
+const form = document.getElementById('form');
+const tabsEl = document.getElementById('tabs');
+
+function el(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
+
+function renderField(k,label,input){
+  if(input==='textarea'){
+    return `<label class="fld"><span>${label}</span><textarea data-k="${k}"></textarea></label>`;
+  }
+  return `<label class="fld"><span>${label}</span><input type="${input||'text'}" data-k="${k}"></label>`;
+}
+
+function renderBlock(b){
+  switch(b.type){
+    case "fields":{
+      let rows="";
+      for(let i=0;i<b.items.length;i+=2){
+        const a=b.items[i],c=b.items[i+1];
+        rows+=`<div class="row">${renderField(...a)}${c?renderField(...c):""}</div>`;
+      }
+      return rows;
+    }
+    case "field": return renderField(b.k,b.label,b.input);
+    case "row":{
+      return `<div class="row">${b.items.map(it=>renderField(...it)).join("")}</div>`;
+    }
+    case "row3":{
+      // special: range items become scales, text stays input
+      return `<div class="row-3">${b.items.map(it=>{
+        if(it[2]==='range') return `<label class="fld"><span>${it[1]}</span><input type="range" min="0" max="10" value="5" data-k="${it[0]}" class="mini-range"></label>`;
+        return renderField(...it);
+      }).join("")}</div>`;
+    }
+    case "divider": return `<div class="sec-divider">${b.t}</div>`;
+    case "notice": return `<div class="notice">${b.t}</div>`;
+    case "checks":{
+      const c = b.cols===3?'c3':b.cols===2?'c2':'';
+      return `<div class="chips ${c}">`+b.items.map((it,idx)=>
+        `<label class="chip ${b.flag?'flag':''}" data-chip><input type="checkbox" data-k="${b.name}_${idx}" data-lbl="${it}">${CHECK}<span>${it}</span></label>`
+      ).join("")+`</div>`;
+    }
+    case "seg":{
+      return `<label class="fld"><span>${b.label}</span><div class="seg" data-seg="${b.k}">`+
+        b.opts.map(o=>`<label class="opt"><input type="radio" name="${b.k}" value="${o}">${o}</label>`).join("")+
+        `</div></label>`;
+    }
+    case "check_single":{
+      return `<label class="chip" data-chip style="max-width:520px"><input type="checkbox" data-k="${b.k}" data-lbl="${b.label}">${CHECK}<span>${b.label}</span></label>`;
+    }
+    case "scale":{
+      return `<div class="scale"><div class="top"><b>${b.label}</b><span class="val" data-val="${b.k}">5 / 10</span></div>
+        <input type="range" min="0" max="10" value="5" data-k="${b.k}" data-scale></div>`;
+    }
+    case "yesno":{
+      return b.items.map((it,idx)=>
+        `<div class="row" style="grid-template-columns:1fr auto;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:15px">${it}</span>
+          <div class="seg" data-seg="${b.name}_${idx}" data-lbl="${it}">
+            <label class="opt"><input type="radio" name="${b.name}_${idx}" value="Oui">Oui</label>
+            <label class="opt"><input type="radio" name="${b.name}_${idx}" value="Non">Non</label>
+          </div>
+        </div>`).join("");
+    }
+    case "zones":{
+      return b.items.map((z,idx)=>
+        `<div class="zonecard"><div class="zh">${z}</div>
+          <div class="row"><label class="fld"><span>Type de douleur / blessure</span><input type="text" data-k="${b.name}${idx}_type"></label>
+          <label class="fld"><span>Depuis</span><input type="text" data-k="${b.name}${idx}_depuis"></label></div>
+          <div class="row"><label class="fld"><span>Intensité 0-10</span><input type="number" min="0" max="10" data-k="${b.name}${idx}_int"></label>
+          <label class="fld"><span>Mouvements douloureux</span><input type="text" data-k="${b.name}${idx}_doul"></label></div>
+          <div class="row"><label class="fld"><span>Mouvements à éviter</span><input type="text" data-k="${b.name}${idx}_eviter"></label>
+          <label class="fld"><span>Suivi méd. / kiné / ostéo</span><input type="text" data-k="${b.name}${idx}_suivi"></label></div>
+        </div>`).join("");
+    }
+    case "moves":{
+      return b.items.map((m,idx)=>
+        `<div class="zonecard"><div class="zh">${m}</div>
+          <div class="seg" data-seg="${b.name}${idx}_res" style="margin-bottom:10px">
+            ${["Réussi","Difficile","Douleur/gêne"].map(o=>`<label class="opt"><input type="radio" name="${b.name}${idx}_res" value="${o}">${o}</label>`).join("")}
+          </div>
+          <div class="row"><label class="fld"><span>Compensation observée</span><input type="text" data-k="${b.name}${idx}_comp"></label>
+          <label class="fld"><span>Remarque du coach</span><input type="text" data-k="${b.name}${idx}_rem"></label></div>
+        </div>`).join("");
+    }
+    case "weeks":{
+      return b.items.map((w,idx)=>
+        `<div class="week"><div class="wh">${w}</div><div class="wb">
+          <label class="fld"><span>Objectif principal</span><input type="text" data-k="${b.name}${idx}_obj"></label>
+          <div class="row"><label class="fld"><span>Type de travail</span><input type="text" data-k="${b.name}${idx}_type"></label>
+          <label class="fld"><span>Remarques / adaptations</span><input type="text" data-k="${b.name}${idx}_rem"></label></div>
+        </div></div>`).join("");
+    }
+  }
+  return "";
+}
+
+STEPS.forEach((s,i)=>{
+  const step=el(`<section class="step" data-step="${i}"></section>`);
+  const card=el(`<div class="card"></div>`);
+  card.appendChild(el(`<div class="sec-h"><div class="badge">${s.badge}</div><h2>${s.title}</h2></div>`));
+  if(s.sub) card.appendChild(el(`<div class="sub">${s.sub}</div>`));
+  s.blocks.forEach(b=>{ card.insertAdjacentHTML('beforeend', renderBlock(b)); });
+  step.appendChild(card);
+  form.appendChild(step);
+
+  const tab=el(`<button data-tab="${i}"><span class="n">${s.n}</span>${s.label}</button>`);
+  tabsEl.appendChild(tab);
+});
+
+/* ============================================================
+   Interactions
+   ============================================================ */
+let current=0;
+const steps=[...document.querySelectorAll('.step')];
+const tabBtns=[...document.querySelectorAll('[data-tab]')];
+
+function showStep(i){
+  current=Math.max(0,Math.min(STEPS.length-1,i));
+  steps.forEach((s,idx)=>s.classList.toggle('show',idx===current));
+  tabBtns.forEach((b,idx)=>b.classList.toggle('active',idx===current));
+  document.getElementById('bar').style.width=((current+1)/STEPS.length*100)+'%';
+  document.getElementById('prev').style.visibility = current===0?'hidden':'visible';
+  const nb=document.getElementById('next');
+  nb.textContent = current===STEPS.length-1 ? 'Terminer ✓' : 'Suivant ›';
+  const at=tabBtns[current]; if(at) at.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('next').onclick=()=>{ if(current===STEPS.length-1){ toast('Fiche complète. Pense à exporter en PDF ⤓'); } else showStep(current+1); };
+document.getElementById('prev').onclick=()=>showStep(current-1);
+tabBtns.forEach((b,i)=>b.onclick=()=>showStep(i));
+
+// chips toggle
+form.addEventListener('click',e=>{
+  const chip=e.target.closest('[data-chip]');
+  if(chip){ const cb=chip.querySelector('input'); cb.checked=!cb.checked; chip.classList.toggle('on',cb.checked); save(); return; }
+});
+// segmented / radio
+form.addEventListener('change',e=>{
+  if(e.target.type==='radio'){
+    const seg=e.target.closest('.seg');
+    if(seg) seg.querySelectorAll('.opt').forEach(o=>o.classList.toggle('on',o.querySelector('input').checked));
+  }
+  save();
+});
+// scales
+form.addEventListener('input',e=>{
+  if(e.target.hasAttribute('data-scale')){
+    const k=e.target.dataset.k; const v=e.target.value;
+    const lab=form.querySelector(`[data-val="${k}"]`); if(lab) lab.textContent=v+' / 10';
+    e.target.style.setProperty('--p',(v*10)+'%');
+  }
+  if(e.target.classList.contains('mini-range')){ e.target.style.setProperty('--p',(e.target.value*10)+'%'); }
+  save();
+});
+
+/* ============================================================
+   Stockage hors-ligne (localStorage)
+   ============================================================ */
+const LSK='coach_fiches_v1';
+let activeId=null;
+
+function collect(){
+  const data={};
+  form.querySelectorAll('[data-k]').forEach(inp=>{
+    if(inp.type==='checkbox') data[inp.dataset.k]=inp.checked;
+    else data[inp.dataset.k]=inp.value;
+  });
+  form.querySelectorAll('input[type=radio]:checked').forEach(r=>{ data['__r_'+r.name]=r.value; });
+  return data;
+}
+function apply(data){
+  form.querySelectorAll('[data-k]').forEach(inp=>{
+    const v=data[inp.dataset.k];
+    if(inp.type==='checkbox'){ inp.checked=!!v; inp.closest('[data-chip]')?.classList.toggle('on',!!v); }
+    else if(v!==undefined){ inp.value=v;
+      if(inp.hasAttribute('data-scale')){const lab=form.querySelector(`[data-val="${inp.dataset.k}"]`); if(lab) lab.textContent=v+' / 10'; inp.style.setProperty('--p',(v*10)+'%');}
+      if(inp.classList.contains('mini-range')) inp.style.setProperty('--p',(v*10)+'%');
+    }
+  });
+  Object.keys(data).filter(k=>k.startsWith('__r_')).forEach(k=>{
+    const name=k.slice(4); const val=data[k];
+    const r=form.querySelector(`input[type=radio][name="${name}"][value="${val}"]`);
+    if(r){ r.checked=true; r.closest('.seg')?.querySelectorAll('.opt').forEach(o=>o.classList.toggle('on',o.querySelector('input').checked)); }
+  });
+}
+function db(){ try{return JSON.parse(localStorage.getItem(LSK))||{}}catch(e){return {}} }
+function dbSave(o){ localStorage.setItem(LSK,JSON.stringify(o)); }
+
+let saveTimer=null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const all=db();
+    if(!activeId) activeId='f_'+Date.now();
+    const data=collect();
+    const name=(data.i_nom||data.i_prenom)?((data.i_nom||'')+' '+(data.i_prenom||'')).trim():(data.nom||'Sans nom');
+    all[activeId]={id:activeId,name:name||'Sans nom',date:data.i_rdv||data.date||'',updated:Date.now(),data};
+    dbSave(all);
+    document.getElementById('curClient').textContent=name||'Nouveau client';
+    flashSaved();
+    refreshHome();
+  },350);
+}
+function flashSaved(){
+  const d=document.getElementById('savedDot');
+  d.style.opacity='0'; requestAnimationFrame(()=>{d.style.transition='opacity .2s';d.style.opacity='1';});
+}
+function newFiche(){
+  activeId=null;
+  form.querySelectorAll('[data-k]').forEach(inp=>{
+    if(inp.type==='checkbox'){inp.checked=false;inp.closest('[data-chip]')?.classList.remove('on');}
+    else if(inp.type==='range'){inp.value=5;inp.style.setProperty('--p','50%');const lab=form.querySelector(`[data-val="${inp.dataset.k}"]`);if(lab)lab.textContent='5 / 10';}
+    else inp.value='';
+  });
+  form.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  form.querySelectorAll('.seg .opt.on').forEach(o=>o.classList.remove('on'));
+  document.getElementById('curClient').textContent='Nouveau client';
+  openForm(); showStep(0); toast('Nouvelle fiche');
+}
+function loadFiche(id){
+  const all=db(); const f=all[id]; if(!f) return;
+  newFiche(); activeId=id; apply(f.data);
+  document.getElementById('curClient').textContent=f.name||'Client';
+  openForm(); showStep(0); toast('Fiche chargée');
+}
+function delFiche(id){
+  if(!confirm('Supprimer cette fiche définitivement ?')) return;
+  const all=db(); delete all[id]; dbSave(all);
+  if(activeId===id){activeId=null;document.getElementById('curClient').textContent='Nouveau client';}
+  refreshHome();
+}
+
+/* ============================================================
+   Navigation entre Accueil et Formulaire
+   ============================================================ */
+const homeView=document.getElementById('home');
+const formView=document.getElementById('form');
+function openForm(){
+  document.body.classList.remove('on-home');
+  document.body.classList.remove('on-detail');
+  homeView.classList.remove('show'); detailView.classList.remove('show'); formView.classList.add('show');
+  document.getElementById('btnHome').style.display='';
+  document.getElementById('btnPrint').style.display='';
+  document.getElementById('appTitle').firstChild.textContent='Fiche premier RDV';
+}
+function goHome(){
+  document.body.classList.add('on-home');
+  document.body.classList.remove('on-detail');
+  formView.classList.remove('show'); homeView.classList.add('show');
+  document.getElementById('detail').classList.remove('show');
+  document.getElementById('btnHome').style.display='none';
+  document.getElementById('btnPrint').style.display='none';
+  document.getElementById('appTitle').firstChild.textContent='Mes fiches';
+  document.getElementById('curClient').textContent='Coaching premier RDV';
+  refreshHome(); window.scrollTo({top:0});
+}
+document.getElementById('btnHome').onclick=goHome;
+document.getElementById('btnNewHome').onclick=newFiche;
+
+/* ============================================================
+   Écran d'accueil : stats + liste + recherche
+   ============================================================ */
+let searchTerm='';
+function refreshHome(){
+  const all=db();
+  const items=Object.values(all).sort((a,b)=>b.updated-a.updated);
+  // stats
+  document.getElementById('statTotal').textContent=items.length;
+  const weekAgo=Date.now()-7*864e5;
+  document.getElementById('statWeek').textContent=items.filter(f=>f.updated>=weekAgo).length;
+  // filtre recherche
+  const term=searchTerm.trim().toLowerCase();
+  const shown=term?items.filter(f=>(f.name||'').toLowerCase().includes(term)):items;
+  const box=document.getElementById('homeList');
+  if(!items.length){
+    box.innerHTML=`<div class="empty">Aucune fiche pour l'instant.<br>Touche « + Nouvelle fiche » pour commencer.</div>`; return;
+  }
+  if(!shown.length){
+    box.innerHTML=`<div class="empty">Aucune fiche ne correspond à « ${term} ».</div>`; return;
+  }
+  box.innerHTML=shown.map(f=>{
+    const d=new Date(f.updated);
+    const when=d.toLocaleDateString('fr-BE');
+    const sc=(f.sessions||[]).length;
+    const last=lastSessionDate(f);
+    return `<div class="fcard">
+      <div class="accent"></div>
+      <div class="fc-main" data-detail="${f.id}">
+        <div class="fc-name">${escapeHtml(f.name)||'Sans nom'}</div>
+        <div class="fc-meta">
+          <span class="tag">${sc} séance${sc>1?'s':''}</span>
+          ${last?`<span>Dernière : ${last}</span>`:`<span>Aucune séance</span>`}
+          ${f.date?`<span>RDV ${f.date}</span>`:''}
+        </div>
+      </div>
+      <div class="fc-acts">
+        <button class="ic" data-detail2="${f.id}" title="Suivi séances">📅</button>
+        <button class="ic del" data-del="${f.id}" title="Supprimer">🗑</button>
+      </div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll('[data-detail]').forEach(e=>e.onclick=()=>openDetail(e.dataset.detail));
+  box.querySelectorAll('[data-detail2]').forEach(e=>e.onclick=()=>openDetail(e.dataset.detail2));
+  box.querySelectorAll('[data-del]').forEach(e=>e.onclick=()=>delFiche(e.dataset.del));
+}
+function lastSessionDate(f){
+  const s=(f.sessions||[]).filter(x=>x.date).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!s.length) return null;
+  const past=s.filter(x=>x.date<=todayISO());
+  const ref=past[0]||null;
+  return ref?frDate(ref.date):null;
+}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function frDate(iso){ if(!iso) return '—'; const p=iso.split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso; }
+function escapeHtml(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const sb=document.getElementById('searchBox');
+sb.addEventListener('input',()=>{searchTerm=sb.value;refreshHome();});
+
+/* ============================================================
+   Export / Import (sauvegarde transférable entre appareils)
+   ============================================================ */
+document.getElementById('btnExport').onclick=()=>{
+  const all=db();
+  if(!Object.keys(all).length){ toast('Aucune fiche à exporter'); return; }
+  const blob=new Blob([JSON.stringify({app:'fiche-coach',version:1,exported:Date.now(),fiches:all},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const today=new Date().toISOString().slice(0,10);
+  a.href=url; a.download=`sauvegarde-fiches-${today}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('Sauvegarde téléchargée ✓');
+};
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
+document.getElementById('fileImport').addEventListener('change',e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(reader.result);
+      const incoming=parsed.fiches||parsed; // tolère un objet brut
+      if(typeof incoming!=='object') throw new Error('format');
+      const all=db(); let added=0;
+      Object.values(incoming).forEach(f=>{
+        if(f && f.id){ all[f.id]=f; added++; }
+      });
+      dbSave(all); refreshHome();
+      toast(added+' fiche(s) importée(s) ✓');
+    }catch(err){ alert("Fichier non reconnu. Choisis un fichier de sauvegarde (.json) exporté depuis cette appli."); }
+    e.target.value='';
+  };
+  reader.readAsText(file);
+});
+
+/* ============================================================
+   VUE CLIENT / SUIVI DES SÉANCES
+   ============================================================ */
+const detailView=document.getElementById('detail');
+let detailId=null;
+
+function getFiche(id){ return db()[id]||null; }
+function saveFiche(f){ const all=db(); all[f.id]=f; dbSave(all); }
+
+function openDetail(id){
+  const f=getFiche(id); if(!f) return;
+  detailId=id;
+  document.body.classList.remove('on-home');
+  document.body.classList.add('on-detail');
+  homeView.classList.remove('show'); formView.classList.remove('show');
+  detailView.classList.add('show');
+  document.getElementById('btnHome').style.display='';
+  document.getElementById('btnPrint').style.display='none';
+  document.getElementById('appTitle').firstChild.textContent='Suivi client';
+  document.getElementById('curClient').textContent=f.name||'Client';
+  document.getElementById('sessionForm').innerHTML='';
+  setDtab('seances');
+  renderDetail();
+  window.scrollTo({top:0});
+}
+function setDtab(name){
+  document.querySelectorAll('[data-dtab]').forEach(b=>b.classList.toggle('on',b.dataset.dtab===name));
+  document.getElementById('paneSeances').classList.toggle('on',name==='seances');
+  document.getElementById('paneFiche').classList.toggle('on',name==='fiche');
+}
+document.querySelectorAll('[data-dtab]').forEach(b=>b.onclick=()=>setDtab(b.dataset.dtab));
+document.getElementById('btnOpenFiche').onclick=()=>{ if(detailId) loadFiche(detailId); };
+
+const SESSION_TYPES=["Renforcement","Cardio","Fonctionnel","Mobilité","Réathlétisation","Mixte","Évaluation","Autre"];
+
+function renderDetail(){
+  const f=getFiche(detailId); if(!f) return;
+  document.getElementById('dName').textContent=f.name||'Client';
+  const sessions=(f.sessions||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const today=todayISO();
+  const past=sessions.filter(s=>s.date && s.date<=today && s.presence!=='Annulé');
+  const future=sessions.filter(s=>s.date && s.date>today).sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById('dCount').textContent=past.length;
+  document.getElementById('dLast').textContent=past.length?frDate(past[0].date):'—';
+  document.getElementById('dNext').textContent=future.length?frDate(future[0].date):'—';
+  document.getElementById('dSub').textContent=`${sessions.length} séance(s) enregistrée(s)`;
+
+  const list=document.getElementById('sessionList');
+  if(!sessions.length){ list.innerHTML=`<div class="empty">Aucune séance pour l'instant.<br>Touche « + Nouvelle séance » pour démarrer le suivi.</div>`; return; }
+  list.innerHTML=sessions.map(s=>{
+    const pres=s.presence==='Annulé'?`<span class="pill no">Annulé</span>`:(s.presence==='Absent'?`<span class="pill no">Absent</span>`:`<span class="pill ok">Présent</span>`);
+    const src=s.gcal?`<span class="pill src">Agenda</span>`:'';
+    const rpe=(s.rpe!==undefined&&s.rpe!=='')?`<span class="pill rpe">RPE ${s.rpe}/10</span>`:'';
+    const meta=[s.type||'Séance', s.duree?`${s.duree} min`:'', s.heure||''].filter(Boolean).join(' · ');
+    const det=[];
+    if(s.exos) det.push('Exercices : '+s.exos);
+    if(s.notes) det.push(s.notes);
+    return `<div class="sess ${s.gcal?'gcal':''}">
+      <button class="sdel" data-sdel="${s.id}" title="Supprimer">🗑</button>
+      <div class="sdate">${frDate(s.date)}</div>
+      <div class="smeta">${meta} ${pres} ${rpe} ${src}</div>
+      ${det.length?`<div class="snote">${escapeHtml(det.join('\n'))}</div>`:''}
+    </div>`;
+  }).join("");
+  list.querySelectorAll('[data-sdel]').forEach(e=>e.onclick=()=>delSession(e.dataset.sdel));
+}
+
+function delSession(sid){
+  if(!confirm('Supprimer cette séance ?')) return;
+  const f=getFiche(detailId); if(!f) return;
+  f.sessions=(f.sessions||[]).filter(s=>s.id!==sid); f.updated=Date.now();
+  saveFiche(f); renderDetail();
+}
+
+document.getElementById('btnAddSession').onclick=()=>{
+  const box=document.getElementById('sessionForm');
+  if(box.innerHTML){ box.innerHTML=''; return; }
+  box.innerHTML=`<div class="miniform">
+    <h4>Nouvelle séance</h4>
+    <div class="row">
+      <label class="fld"><span>Date</span><input type="date" id="ns_date" value="${todayISO()}"></label>
+      <label class="fld"><span>Heure</span><input type="time" id="ns_heure" value="18:00"></label>
+    </div>
+    <div class="row">
+      <label class="fld"><span>Type de séance</span><select id="ns_type">${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></label>
+      <label class="fld"><span>Durée (min)</span><input type="number" id="ns_duree" value="${CONFIG.DEFAULT_DURATION}"></label>
+    </div>
+    <label class="fld"><span>Présence</span>
+      <div class="seg" id="ns_presence">
+        <label class="opt on"><input type="radio" name="ns_pres" value="Présent" checked>Présent</label>
+        <label class="opt"><input type="radio" name="ns_pres" value="Absent">Absent</label>
+        <label class="opt"><input type="radio" name="ns_pres" value="Annulé">Annulé</label>
+      </div>
+    </label>
+    <div class="scale"><div class="top"><b>Charge perçue (RPE)</b><span class="val" id="ns_rpeval">5 / 10</span></div>
+      <input type="range" min="0" max="10" value="5" id="ns_rpe"></div>
+    <label class="fld"><span>Exercices / contenu</span><textarea id="ns_exos" placeholder="Ex : squat, gainage, vélo 15 min…"></textarea></label>
+    <label class="fld"><span>Notes / ressenti / progression</span><textarea id="ns_notes"></textarea></label>
+    <label class="chip" id="ns_addcal" data-on="1" style="margin-bottom:12px"><input type="checkbox" checked>${CHECK}<span>Ajouter aussi à mon Google Agenda</span></label>
+    <div class="modal-actions">
+      <button class="btn btn-soft" id="ns_cancel">Annuler</button>
+      <button class="btn btn-primary" id="ns_save">Enregistrer la séance</button>
+    </div>
+    <div class="gsync-note" id="ns_note">Si Google Agenda est connecté, la séance y sera ajoutée automatiquement. Sinon elle est enregistrée localement.</div>
+  </div>`;
+  // interactions
+  const seg=document.getElementById('ns_presence');
+  seg.addEventListener('change',()=>seg.querySelectorAll('.opt').forEach(o=>o.classList.toggle('on',o.querySelector('input').checked)));
+  const rpe=document.getElementById('ns_rpe');
+  rpe.style.setProperty('--p','50%');
+  rpe.addEventListener('input',()=>{document.getElementById('ns_rpeval').textContent=rpe.value+' / 10';rpe.style.setProperty('--p',(rpe.value*10)+'%');});
+  const cal=document.getElementById('ns_addcal');
+  cal.onclick=e=>{ const cb=cal.querySelector('input'); cb.checked=!cb.checked; cal.classList.toggle('on',cb.checked); };
+  cal.classList.add('on');
+  document.getElementById('ns_cancel').onclick=()=>{box.innerHTML='';};
+  document.getElementById('ns_save').onclick=saveNewSession;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+
+async function saveNewSession(){
+  const f=getFiche(detailId); if(!f) return;
+  const g=id=>document.getElementById(id);
+  const presence=(document.querySelector('input[name="ns_pres"]:checked')||{}).value||'Présent';
+  const s={
+    id:'s_'+Date.now(),
+    date:g('ns_date').value||todayISO(),
+    heure:g('ns_heure').value||'',
+    type:g('ns_type').value,
+    duree:g('ns_duree').value||CONFIG.DEFAULT_DURATION,
+    presence,
+    rpe:g('ns_rpe').value,
+    exos:g('ns_exos').value.trim(),
+    notes:g('ns_notes').value.trim(),
+    gcal:false
+  };
+  const wantCal=g('ns_addcal').querySelector('input').checked;
+  f.sessions=f.sessions||[]; f.sessions.push(s); f.updated=Date.now(); saveFiche(f);
+  document.getElementById('sessionForm').innerHTML='';
+  renderDetail(); toast('Séance enregistrée ✓');
+
+  if(wantCal){
+    if(!gIsReady()){ toast('Agenda non connecté — séance gardée en local'); return; }
+    try{
+      await gcalCreateEvent(f.name, s);
+      s.gcal=true; saveFiche(f); renderDetail();
+      toast('Ajoutée à Google Agenda ✓');
+    }catch(err){ console.error(err); toast('Échec ajout agenda (gardé en local)'); }
+  }
+}
+
+/* ============================================================
+   GOOGLE AGENDA — connexion & synchronisation
+   ============================================================ */
+let gTokenClient=null, gToken=null, gapiReady=false;
+function gIsReady(){ return gapiReady && gToken; }
+
+function gInit(){
+  if(!CONFIG.GOOGLE_CLIENT_ID){
+    document.getElementById('ghint').textContent="Ajoute ton ID client dans le fichier pour activer la synchro (voir guide).";
+    return;
+  }
+  // charge gapi client
+  const waitGapi=setInterval(()=>{
+    if(window.gapi){ clearInterval(waitGapi); gapi.load('client',async()=>{
+      await gapi.client.init({discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]});
+      gapiReady=true;
+    });}
+  },300);
+  // init token client
+  const waitGis=setInterval(()=>{
+    if(window.google && google.accounts && google.accounts.oauth2){
+      clearInterval(waitGis);
+      gTokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:CONFIG.GOOGLE_CLIENT_ID, scope:GCAL_SCOPE,
+        callback:(resp)=>{ if(resp.access_token){ gToken=resp.access_token; gapi.client.setToken({access_token:gToken}); gSetConnected(true); toast('Google Agenda connecté ✓'); } }
+      });
+    }
+  },300);
+}
+function gSetConnected(on){
+  const bar=document.getElementById('gbar');
+  bar.classList.toggle('ok',on);
+  document.getElementById('gstate').textContent=on?'Google Agenda connecté':'Google Agenda non connecté';
+  document.getElementById('ghint').textContent=on?'Les nouvelles séances peuvent être ajoutées à ton agenda.':'Connecte-toi pour synchroniser les séances.';
+  document.getElementById('btnGoogle').textContent=on?'Déconnecter':'Connexion Google';
+}
+document.getElementById('btnGoogle').onclick=()=>{
+  if(!CONFIG.GOOGLE_CLIENT_ID){ alert("Aucun ID client Google n'est configuré.\n\nOuvre le fichier, trouve GOOGLE_CLIENT_ID en haut du script et colle ton identifiant (voir le guide d'installation fourni)."); return; }
+  if(gToken){ // déconnexion
+    google.accounts.oauth2.revoke(gToken,()=>{}); gToken=null; gapi.client.setToken(null); gSetConnected(false); toast('Déconnecté'); return;
+  }
+  if(gTokenClient) gTokenClient.requestAccessToken({prompt:'consent'});
+  else toast('Service Google en cours de chargement, réessaie dans 2 s');
+};
+
+async function gcalCreateEvent(clientName, s){
+  const start=new Date(`${s.date}T${(s.heure||'18:00')}:00`);
+  const end=new Date(start.getTime()+ (parseInt(s.duree)||60)*60000);
+  const desc=[
+    `Type : ${s.type}`,
+    `Présence : ${s.presence}`,
+    `Charge perçue : ${s.rpe}/10`,
+    s.exos?`Exercices : ${s.exos}`:'',
+    s.notes?`Notes : ${s.notes}`:''
+  ].filter(Boolean).join('\n');
+  return gapi.client.calendar.events.insert({
+    calendarId:'primary',
+    resource:{
+      summary:`${CONFIG.EVENT_TAG} ${clientName} — ${s.type}`,
+      description:desc,
+      start:{dateTime:start.toISOString()},
+      end:{dateTime:end.toISOString()}
+    }
+  });
+}
+
+/* print */
+function doPrint(){ steps.forEach(s=>s.classList.add('show')); window.print(); setTimeout(()=>showStep(current),300); }
+document.getElementById('btnPrint').onclick=doPrint;
+
+/* toast */
+let tt=null;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* init */
+showStep(0);
+goHome();
+gInit();
+window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);});
+</script>
+</body>
+</html>
