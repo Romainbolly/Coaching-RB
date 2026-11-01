@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#173f59"/>
+  <circle cx="256" cy="256" r="164" fill="#ffffff" opacity="0.08"/>
+  <path d="M136 226h46v60h-46v-60Zm194 0h46v60h-46v-60ZM184 244h144v24H184v-24Zm-30-40h22v104h-22V204Zm182 0h22v104h-22V204Z" fill="#fff"/>
+  <text x="256" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="700" fill="#fff">FBT</text>
+</svg>
