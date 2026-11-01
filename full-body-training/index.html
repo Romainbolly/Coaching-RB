@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#173f59">
+<meta name="description" content="Suivi mobile des présences et paiements Full Body Training – Rééduc & Vous">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Full Body Training – Suivi</title>
+<style>
+:root{--navy:#173f59;--navy2:#245d7b;--blue:#2b78a7;--bg:#f3f6f8;--card:#fff;--text:#17212b;--muted:#6d7b87;--green:#188657;--green2:#e5f6ed;--orange:#c96d00;--orange2:#fff1df;--red:#bb3948;--red2:#fde9ec;--line:#d9e4ea;--shadow:0 8px 24px rgba(21,58,79,.08)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:96px}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
+header{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 13px;box-shadow:0 4px 18px rgba(13,37,52,.2)}header h1{margin:0;font-size:20px;letter-spacing:.1px}header p{margin:3px 0 0;font-size:12px;opacity:.86}
+.wrap{max-width:980px;margin:auto;padding:12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px;margin-bottom:12px}.panel h2{font-size:17px;margin:0 0 4px}.sub{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 10px}.hidden{display:none!important}
+.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;box-shadow:var(--shadow)}.stat b{display:block;color:var(--navy);font-size:20px}.stat span{display:block;color:var(--muted);font-size:10px;margin-top:2px;line-height:1.25}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#e8eef2;border-radius:13px;padding:4px;margin-bottom:10px}.segment button{border:0;border-radius:10px;padding:10px 8px;background:transparent;color:#5d707c;font-weight:800}.segment button.active{background:#fff;color:var(--navy);box-shadow:0 2px 8px rgba(20,53,72,.08)}
+.sessionbar{display:grid;grid-template-columns:1fr auto;gap:8px}.field{margin:8px 0}.field label{font-size:11px;color:var(--muted);display:block;margin:0 0 4px}.field input,.field select,.field textarea,.sessionbar select{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff;color:var(--text);min-height:42px}.field textarea{min-height:72px;resize:vertical}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.btn{border:0;border-radius:11px;padding:10px 12px;font-weight:800}.btn.primary{background:var(--navy);color:#fff}.btn.secondary{background:#eaf0f4;color:var(--navy)}.btn.good{background:var(--green2);color:#176c48}.btn.warn{background:var(--orange2);color:#8d540b}.btn.danger{background:var(--red2);color:#972f3c}.btn.small{padding:7px 9px;font-size:12px}.btn.full{width:100%}.btn:active{transform:scale(.985)}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.person-grid{display:grid;gap:9px}.person{background:#fff;border:1px solid var(--line);border-radius:15px;padding:11px;box-shadow:0 3px 12px rgba(20,53,72,.05)}.person.present{border-color:#a9dcc3;background:#fbfffd}.person-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.person-name{font-size:16px;font-weight:850}.amount{font-weight:850;color:var(--navy);white-space:nowrap}.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.badge{font-size:10px;background:#edf3f6;color:#38596d;border-radius:999px;padding:4px 7px;font-weight:750}.badge.member{background:#e6f6ee;color:#196b49}.badge.unit{background:#fff0d9;color:#935c0b}.badge.pending{background:#f4ecff;color:#6a45a2}.badge.paid{background:#e6f6ee;color:#196b49}
+.attendance-btn{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 10px;background:#f7f9fa;color:#425865;font-weight:850;margin-top:9px}.attendance-btn.on{background:var(--green);border-color:var(--green);color:#fff}.confirm-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.pay-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:7px}.pay-status{grid-column:1/-1;background:#f4f7f9;border-radius:10px;padding:8px 10px;font-size:12px;color:#49616f;display:flex;justify-content:space-between;gap:8px;align-items:center}.pay-status strong{color:var(--navy)}
+.notice{background:#fff7e5;border:1px solid #f1d08b;color:#765318;padding:9px 10px;border-radius:11px;font-size:12px;line-height:1.4;margin-bottom:10px}.success{background:#ecf8f1;border:1px solid #b9e4cd;color:#176c48;padding:9px 10px;border-radius:11px;font-size:12px;line-height:1.4;margin-bottom:10px}.empty{text-align:center;color:var(--muted);padding:20px 10px;font-size:13px}
+.date-list{display:grid;gap:9px}.date-card{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fff}.date-card:active{transform:scale(.995)}.date-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}.date-head strong{font-size:14px}.date-head span{font-size:11px;color:var(--muted)}.date-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.mini{background:#f5f8fa;border-radius:9px;padding:7px;text-align:center}.mini b{display:block;font-size:15px;color:var(--navy)}.mini span{font-size:9px;color:var(--muted)}.names{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.4}.names b{color:#435b69}
+.listline{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}.listline:last-child{border-bottom:0}.listline strong{text-align:right}.search{position:relative}.search input{padding-left:35px}.search:before{content:'⌕';position:absolute;left:12px;top:31px;color:#758793;font-size:18px}
+.person-edit{border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:9px;background:#fff}.person-edit details summary{font-weight:850;cursor:pointer;list-style:none}.person-edit details summary::-webkit-details-marker{display:none}.person-edit summary{display:flex;justify-content:space-between;gap:8px;align-items:center}.person-edit .edit-body{padding-top:8px}.contactline{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}.contactline a{text-decoration:none;background:#edf3f6;padding:7px 9px;border-radius:9px;font-size:11px;font-weight:750;color:#31566a}
+.matrix-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}.matrix{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12px}.matrix th,.matrix td{background:#fff;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px;text-align:center}.matrix th{background:#edf3f6;position:sticky;top:0;z-index:2}.matrix th:first-child,.matrix td:first-child{position:sticky;left:0;z-index:3;text-align:left;min-width:165px}.matrix th:first-child{z-index:4}.matrix input{width:22px;height:22px;accent-color:var(--green)}
+.bottomnav{position:fixed;z-index:40;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:7px 6px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr)}.bottomnav button{border:0;background:transparent;color:#687984;font-size:10px;font-weight:800;padding:5px}.bottomnav button strong{display:block;font-size:20px;line-height:21px}.bottomnav button.active{color:var(--navy)}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(8,24,34,.42);display:flex;align-items:flex-end;justify-content:center;padding:12px}.sheet{width:100%;max-width:560px;background:#fff;border-radius:20px;padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.18);max-height:86vh;overflow:auto}.sheet h3{margin:0 0 4px}.sheet .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.footer-note{text-align:center;font-size:10px;color:var(--muted);padding:4px 8px 14px}
+@media(min-width:700px){.summary{grid-template-columns:repeat(4,1fr)}.person-grid{grid-template-columns:1fr 1fr}.bottomnav{max-width:620px;left:50%;right:auto;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0}.wrap{padding:16px}.date-stats{grid-template-columns:repeat(4,1fr)}}
+@media print{header,.bottomnav,.no-print{display:none!important}.wrap{max-width:none}.panel,.person{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><h1>Full Body Training</h1><p>Rééduc & Vous · présences, paiements et suivi</p></header>
+<main class="wrap">
+  <div id="installNotice" class="notice no-print hidden">📱 Sur iPhone : ouvrez cette page dans Safari puis <b>Partager → Sur l’écran d’accueil</b>. L’app fonctionnera ensuite comme une application et restera utilisable hors ligne.</div>
+  <div id="topSummary" class="summary"></div>
+
+  <section id="view-today" class="view">
+    <div class="panel">
+      <h2>Séance</h2><p class="sub">Choisissez le groupe et la date. Au début du cours, cochez simplement les présences et les paiements.</p>
+      <div class="segment" id="groupSegment"><button class="active" data-group="19">19 h–20 h</button><button data-group="20">20 h–21 h</button></div>
+      <div class="sessionbar"><select id="sessionSelect"></select><button class="btn secondary" id="jumpToday">Aujourd’hui</button></div>
+      <div id="sessionMini" class="summary" style="margin-top:9px;margin-bottom:0"></div>
+      <div class="quick-actions"><button class="btn good" id="allPresent">Tout présent</button><button class="btn secondary" id="nonePresent">Tout décocher</button></div>
+    </div>
+    <div id="todayList" class="person-grid"></div>
+  </section>
+
+  <section id="view-summary" class="view hidden">
+    <div class="panel"><h2>Résumé par date</h2><p class="sub">Touchez une date pour revenir directement à la feuille de présence correspondante.</p><div id="dateSummary" class="date-list"></div></div>
+    <div class="panel"><h2>Groupes</h2><div id="groupSummary"></div></div>
+    <div class="panel"><h2>Finances</h2><div id="financeSummary"></div></div>
+  </section>
+
+  <section id="view-people" class="view hidden">
+    <div class="panel no-print">
+      <h2>Ajouter une participante</h2><p class="sub">Ajoutez une nouvelle personne en quelques secondes. Le tarif est calculé automatiquement.</p>
+      <div class="field"><label>Nom et prénom</label><input id="addName" placeholder="Ex. Julie Dupont" autocomplete="off"></div>
+      <div class="grid2"><div class="field"><label>Groupe</label><select id="addGroup"><option value="19">19 h–20 h</option><option value="20">20 h–21 h</option></select></div><div class="field"><label>Formule</label><select id="addPlan"><option value="cycle">Cycle de 7 séances</option><option value="unit">À la séance</option></select></div></div>
+      <div class="grid2"><div class="field"><label>Téléphone (facultatif)</label><input id="addPhone" inputmode="tel" placeholder="04..." autocomplete="tel"></div><div class="field"><label>E-mail (facultatif)</label><input id="addEmail" type="email" placeholder="...@..." autocomplete="email"></div></div>
+      <div class="field"><label><input type="checkbox" id="addMember"> Abonnée à Rééduc & Vous</label></div>
+      <div class="field"><label>Note pratique (facultatif)</label><input id="addNote" placeholder="Ex. genou sensible, préfère 20 h..."></div>
+      <button class="btn primary full" id="addPerson">Ajouter la participante</button>
+    </div>
+    <div class="panel"><h2>Participantes</h2><div class="field search"><label>Rechercher</label><input id="peopleSearch" placeholder="Nom..."></div><div id="peopleList"></div></div>
+  </section>
+
+  <section id="view-cycle" class="view hidden">
+    <div class="panel"><h2>Cycle complet</h2><p class="sub">7 jeudis + une colonne de rattrapage. Une coche = présente. Pour une séance à l’unité, € indique le paiement de 15 €.</p><div class="matrix-wrap"><table class="matrix" id="matrix"></table></div></div>
+    <div class="panel no-print"><h2>Sauvegarde & export</h2><p class="sub">Les données restent sur cet appareil. Faites une sauvegarde de temps en temps, surtout avant de changer de téléphone.</p><div class="grid2"><button class="btn secondary" id="exportCsv">Exporter CSV</button><button class="btn secondary" id="backupBtn">Sauvegarde JSON</button></div><div class="grid2" style="margin-top:8px"><label class="btn secondary" style="text-align:center">Restaurer<input hidden type="file" id="restoreInput" accept="application/json,.json"></label><button class="btn danger" id="resetBtn">Réinitialiser</button></div></div>
+    <div class="footer-note">Données enregistrées uniquement dans le navigateur de cet appareil.</div>
+  </section>
+</main>
+
+<nav class="bottomnav no-print">
+  <button class="active" data-view="today"><strong>✓</strong>Séance</button>
+  <button data-view="summary"><strong>▦</strong>Résumé</button>
+  <button data-view="people"><strong>👥</strong>Participants</button>
+  <button data-view="cycle"><strong>▥</strong>Cycle</button>
+</nav>
+
+<div id="payModal" class="modal hidden"><div class="sheet"><h3 id="payTitle">Paiement</h3><p id="payText" class="sub"></p><div class="actions"><button class="btn good" data-paymethod="Virement">Virement</button><button class="btn warn" data-paymethod="Liquide">Liquide</button></div><button class="btn secondary full" id="payCancel" style="margin-top:8px">Annuler</button></div></div>
+
+<script>
+'use strict';
+const APP_VERSION=3;
+const KEY='fbt_reeduc_vous_v3';
+const OLD_KEY='fbt_reeduc_vous_v2';
+const CAPACITY={19:8,20:8};
+const SESSIONS=[
+ {id:'s1',date:'2026-11-05',short:'05/11',label:'Jeudi 5 novembre'},
+ {id:'s2',date:'2026-11-12',short:'12/11',label:'Jeudi 12 novembre'},
+ {id:'s3',date:'2026-11-19',short:'19/11',label:'Jeudi 19 novembre'},
+ {id:'s4',date:'2026-11-26',short:'26/11',label:'Jeudi 26 novembre'},
+ {id:'s5',date:'2026-12-03',short:'03/12',label:'Jeudi 3 décembre'},
+ {id:'s6',date:'2026-12-10',short:'10/12',label:'Jeudi 10 décembre'},
+ {id:'s7',date:'2026-12-17',short:'17/12',label:'Jeudi 17 décembre'},
+ {id:'r1',date:'rattrapage',short:'R',label:'Rattrapage cycle suivant',makeup:true}
+];
+const EMPTY_STATE={version:APP_VERSION,selectedSession:'s1',selectedGroup:'19',people:[]};
+let pendingPayment=null;
+let data=load();
+
+function uid(){return 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8)}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function feeFor(plan,member){return plan==='unit'?15:(member?90:100)}
+function cleanPhone(v){return String(v||'').replace(/\D/g,'')}
+function waPhone(v){let p=cleanPhone(v);if(!p)return'';if(p.startsWith('0'))p='32'+p.slice(1);return p}
+function normalizePerson(p={}){
+ const out={id:p.id||uid(),name:p.name||'',phone:p.phone||'',email:p.email||'',group:String(p.group||'19'),plan:p.plan==='unit'?'unit':'cycle',member:!!p.member,confirmed:!!p.confirmed,notes:p.notes||'',cyclePaid:!!p.cyclePaid,cyclePaymentMethod:p.cyclePaymentMethod||p.paymentMethod||'',cyclePaymentDate:p.cyclePaymentDate||'',attendance:{...(p.attendance||{})},unitPaid:{...(p.unitPaid||{})},unitPaymentMethod:{...(p.unitPaymentMethod||{})},fee:feeFor(p.plan==='unit'?'unit':'cycle',!!p.member)};
+ SESSIONS.forEach(s=>{if(!(s.id in out.attendance))out.attendance[s.id]=false;if(!(s.id in out.unitPaid))out.unitPaid[s.id]=false;if(!(s.id in out.unitPaymentMethod))out.unitPaymentMethod[s.id]=''});
+ return out;
+}
+function migrateOld(x){
+ if(!x||!Array.isArray(x.people))return clone(EMPTY_STATE);
+ return {version:APP_VERSION,selectedSession:x.selectedSession||'s1',selectedGroup:'19',people:x.people.map(p=>normalizePerson(p))};
+}
+function load(){
+ try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.people))return migrateOld(x)}catch(e){}
+ try{const old=JSON.parse(localStorage.getItem(OLD_KEY));if(old&&Array.isArray(old.people)){const m=migrateOld(old);localStorage.setItem(KEY,JSON.stringify(m));return m}}catch(e){}
+ return clone(EMPTY_STATE);
+}
+function save(){data.version=APP_VERSION;localStorage.setItem(KEY,JSON.stringify(data))}
+function byId(id){return data.people.find(p=>p.id===id)}
+function selectedSession(){return SESSIONS.find(s=>s.id===data.selectedSession)||SESSIONS[0]}
+function peopleForGroup(g=data.selectedGroup){return data.people.filter(p=>p.group===String(g)).sort((a,b)=>a.plan===b.plan?a.name.localeCompare(b.name,'fr'):(a.plan==='cycle'?-1:1))}
+function countPresent(g,sid){return data.people.filter(p=>p.group===String(g)&&p.attendance[sid]).length}
+function expectedForGroup(g){return data.people.filter(p=>p.group===String(g)).length}
+function confirmedCycle(g){return data.people.filter(p=>p.group===String(g)&&p.plan==='cycle'&&p.confirmed).length}
+function registeredCycle(g){return data.people.filter(p=>p.group===String(g)&&p.plan==='cycle').length}
+function amountCollected(){let total=0;data.people.forEach(p=>{if(p.plan==='cycle'&&p.cyclePaid)total+=p.fee;if(p.plan==='unit')SESSIONS.forEach(s=>{if(p.unitPaid[s.id])total+=15})});return total}
+function unpaidCycles(){return data.people.filter(p=>p.plan==='cycle'&&!p.cyclePaid)}
+function sessionRevenue(sid){let total=0;data.people.forEach(p=>{if(p.plan==='cycle'&&p.cyclePaid&&p.cyclePaymentDate===sid)total+=p.fee;if(p.plan==='unit'&&p.unitPaid[sid])total+=15});return total}
+function sessionLabel(id){return (SESSIONS.find(s=>s.id===id)||{}).label||id}
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+
+function renderInstallNotice(){const el=document.getElementById('installNotice');if(!isStandalone()&&!sessionStorage.getItem('fbt_install_dismissed'))el.classList.remove('hidden');else el.classList.add('hidden')}
+function renderTopSummary(){
+ const sid=data.selectedSession;const g19=expectedForGroup('19'),g20=expectedForGroup('20');
+ document.getElementById('topSummary').innerHTML=`
+ <div class="stat"><b>${g19}/${CAPACITY[19]}</b><span>inscrites · 19 h</span></div>
+ <div class="stat"><b>${g20}/${CAPACITY[20]}</b><span>inscrites · 20 h</span></div>
+ <div class="stat"><b>${countPresent(data.selectedGroup,sid)}</b><span>présentes · séance choisie</span></div>
+ <div class="stat"><b>${unpaidCycles().length}</b><span>cycles à payer</span></div>`;
+}
+function renderGroupSegment(){document.querySelectorAll('#groupSegment button').forEach(b=>b.classList.toggle('active',b.dataset.group===data.selectedGroup))}
+function renderSessionMini(){const sid=data.selectedSession,g=data.selectedGroup,ps=peopleForGroup(g),pres=ps.filter(p=>p.attendance[sid]).length,unpaid=ps.filter(p=>p.plan==='cycle'&&!p.cyclePaid).length,unit=ps.filter(p=>p.plan==='unit'&&p.attendance[sid]).length;document.getElementById('sessionMini').innerHTML=`<div class="stat"><b>${pres}/${ps.length}</b><span>présentes</span></div><div class="stat"><b>${unpaid}</b><span>cycles non payés</span></div><div class="stat"><b>${unit}</b><span>à la séance présentes</span></div><div class="stat"><b>${sessionRevenue(sid)} €</b><span>encaissé ce jour</span></div>`}
+function badge(p){return `<div class="badges"><span class="badge">${p.group} h</span><span class="badge ${p.plan==='unit'?'unit':''}">${p.plan==='cycle'?'Cycle 7 séances':'À la séance'}</span>${p.member?'<span class="badge member">Abonnée</span>':''}${p.confirmed?'<span class="badge paid">Confirmée</span>':'<span class="badge pending">À confirmer</span>'}</div>`}
+function paymentText(p,sid){if(p.plan==='cycle'){if(p.cyclePaid)return `Payé ${p.fee} € · ${esc(p.cyclePaymentMethod||'mode non précisé')}${p.cyclePaymentDate?' · '+esc((SESSIONS.find(s=>s.id===p.cyclePaymentDate)||{}).short||''):''}`;return `${p.fee} € à régler`}if(p.unitPaid[sid])return `Payé 15 € · ${esc(p.unitPaymentMethod[sid]||'mode non précisé')}`;return '15 € à régler si présente'}
+function renderToday(){
+ renderGroupSegment();renderSessionMini();const sid=data.selectedSession,el=document.getElementById('todayList'),ps=peopleForGroup();
+ if(!ps.length){
+  if(!data.people.length){
+    el.innerHTML='<div class="panel"><h2>Première utilisation</h2><p class="sub">Ajoutez vos participantes une par une ou importez une sauvegarde JSON contenant votre liste initiale.</p><label class="btn primary full" style="display:block;text-align:center">Importer ma liste<input hidden type="file" id="quickRestore" accept="application/json,.json"></label><button class="btn secondary full" style="margin-top:8px" id="goPeople">Ajouter manuellement</button></div>';
+    document.getElementById('quickRestore').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreFile(f)});
+    document.getElementById('goPeople').addEventListener('click',()=>switchView('people'));
+  }else el.innerHTML='<div class="panel empty">Aucune participante dans ce groupe. Ajoutez-en depuis l’onglet Participants.</div>';
+  return
+}
+ el.innerHTML=ps.map(p=>{const paid=p.plan==='cycle'?p.cyclePaid:p.unitPaid[sid],present=!!p.attendance[sid];return `<article class="person ${present?'present':''}" data-card="${p.id}"><div class="person-head"><div><div class="person-name">${esc(p.name)}</div>${badge(p)}</div><div class="amount">${p.plan==='cycle'?p.fee+' €':'15 €'}</div></div><button class="attendance-btn ${present?'on':''}" data-action="present" data-id="${p.id}">${present?'✓ Présente':'○ Marquer présente'}</button><div class="confirm-row"><button class="btn ${p.confirmed?'good':'secondary'}" data-action="confirm" data-id="${p.id}">${p.confirmed?'✓ Confirmée':'Confirmer inscription'}</button><button class="btn ${paid?'good':'warn'}" data-action="pay" data-id="${p.id}">${paid?'✓ Paiement':'Paiement'}</button></div><div class="pay-status"><span>${paymentText(p,sid)}</span>${paid?`<button class="btn small secondary" data-action="unpay" data-id="${p.id}">Modifier</button>`:''}</div>${p.notes?`<div class="sub" style="margin:8px 2px 0">📝 ${esc(p.notes)}</div>`:''}</article>`}).join('');
+ el.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',handleTodayAction));
+}
+function handleTodayAction(e){const b=e.currentTarget,p=byId(b.dataset.id),sid=data.selectedSession,a=b.dataset.action;if(!p)return;if(a==='present')p.attendance[sid]=!p.attendance[sid];if(a==='confirm')p.confirmed=!p.confirmed;if(a==='pay')openPayment(p,sid);if(a==='unpay'){if(p.plan==='cycle'){p.cyclePaid=false;p.cyclePaymentMethod='';p.cyclePaymentDate=''}else{p.unitPaid[sid]=false;p.unitPaymentMethod[sid]=''}save();renderEverything()}if(a==='present'||a==='confirm'){save();renderEverything()}}
+function openPayment(p,sid){pendingPayment={personId:p.id,sid};document.getElementById('payTitle').textContent='Paiement · '+p.name;document.getElementById('payText').textContent=p.plan==='cycle'?`Valider le paiement du cycle (${p.fee} €) ?`:'Valider le paiement de 15 € pour '+sessionLabel(sid)+' ?';document.getElementById('payModal').classList.remove('hidden')}
+function closePayment(){pendingPayment=null;document.getElementById('payModal').classList.add('hidden')}
+function setPayment(method){if(!pendingPayment)return;const p=byId(pendingPayment.personId),sid=pendingPayment.sid;if(!p)return closePayment();if(p.plan==='cycle'){p.cyclePaid=true;p.cyclePaymentMethod=method;p.cyclePaymentDate=sid}else{p.unitPaid[sid]=true;p.unitPaymentMethod[sid]=method}save();closePayment();renderEverything()}
+
+function renderDateSummary(){const target=document.getElementById('dateSummary');const realSessions=SESSIONS.filter(s=>!s.makeup);target.innerHTML=realSessions.map(s=>{const ps=data.people.filter(p=>p.attendance[s.id]),g19=ps.filter(p=>p.group==='19').length,g20=ps.filter(p=>p.group==='20').length,unit=ps.filter(p=>p.plan==='unit').length,rev=sessionRevenue(s.id);const absent19=data.people.filter(p=>p.group==='19'&&!p.attendance[s.id]).map(p=>p.name),absent20=data.people.filter(p=>p.group==='20'&&!p.attendance[s.id]).map(p=>p.name);return `<button class="date-card" data-date="${s.id}" style="width:100%;text-align:left"><div class="date-head"><strong>${esc(s.label)}</strong><span>${ps.length} présente${ps.length>1?'s':''}</span></div><div class="date-stats"><div class="mini"><b>${g19}</b><span>19 h</span></div><div class="mini"><b>${g20}</b><span>20 h</span></div><div class="mini"><b>${unit}</b><span>à la séance</span></div><div class="mini"><b>${rev} €</b><span>encaissé</span></div></div><div class="names"><b>Absentes 19 h :</b> ${absent19.length?esc(absent19.join(', ')):'—'}<br><b>Absentes 20 h :</b> ${absent20.length?esc(absent20.join(', ')):'—'}</div></button>`}).join('');target.querySelectorAll('[data-date]').forEach(b=>b.addEventListener('click',()=>{data.selectedSession=b.dataset.date;save();document.getElementById('sessionSelect').value=data.selectedSession;switchView('today');renderEverything()}))}
+function renderGroupSummary(){let html='';['19','20'].forEach(g=>{const all=data.people.filter(p=>p.group===g),cycle=all.filter(p=>p.plan==='cycle'),unit=all.filter(p=>p.plan==='unit'),conf=cycle.filter(p=>p.confirmed).length;html+=`<div class="listline"><span><b>${g} h–${Number(g)+1} h</b><br><small>${cycle.length} cycle · ${unit.length} unité</small></span><strong>${all.length}/${CAPACITY[g]} places<br><small>${conf} cycles confirmés</small></strong></div>`});document.getElementById('groupSummary').innerHTML=html}
+function renderFinance(){const cyc=data.people.filter(p=>p.plan==='cycle'),paid=cyc.filter(p=>p.cyclePaid),due=cyc.filter(p=>!p.cyclePaid),cycleRev=paid.reduce((s,p)=>s+p.fee,0),unitRev=data.people.reduce((sum,p)=>sum+(p.plan==='unit'?SESSIONS.reduce((a,s)=>a+(p.unitPaid[s.id]?15:0),0):0),0);document.getElementById('financeSummary').innerHTML=`<div class="listline"><span>Cycles payés</span><strong>${paid.length}/${cyc.length} · ${cycleRev} €</strong></div><div class="listline"><span>Séances à l’unité encaissées</span><strong>${unitRev} €</strong></div><div class="listline"><span>Total encaissé enregistré</span><strong>${cycleRev+unitRev} €</strong></div><div class="listline"><span>Cycles à payer</span><strong>${due.length}</strong></div>${due.length?`<div class="names"><b>En attente :</b> ${esc(due.map(p=>p.name).join(', '))}</div>`:''}`}
+
+function renderPeople(){const q=document.getElementById('peopleSearch').value.trim().toLowerCase();const ps=data.people.filter(p=>!q||p.name.toLowerCase().includes(q)).sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name,'fr'));const el=document.getElementById('peopleList');if(!ps.length){el.innerHTML='<div class="empty">Aucune participante.</div>';return}el.innerHTML=ps.map(p=>`<div class="person-edit"><details><summary><span>${esc(p.name)}<br>${badge(p)}</span><span class="amount">${p.plan==='cycle'?p.fee+' €':'15 €'}</span></summary><div class="edit-body"><div class="grid2"><div class="field"><label>Groupe</label><select data-edit="group" data-id="${p.id}"><option value="19" ${p.group==='19'?'selected':''}>19 h–20 h</option><option value="20" ${p.group==='20'?'selected':''}>20 h–21 h</option></select></div><div class="field"><label>Formule</label><select data-edit="plan" data-id="${p.id}"><option value="cycle" ${p.plan==='cycle'?'selected':''}>Cycle</option><option value="unit" ${p.plan==='unit'?'selected':''}>À la séance</option></select></div></div><div class="grid2"><div class="field"><label>Téléphone</label><input data-edit="phone" data-id="${p.id}" value="${esc(p.phone)}" inputmode="tel"></div><div class="field"><label>E-mail</label><input data-edit="email" data-id="${p.id}" value="${esc(p.email)}" type="email"></div></div><div class="grid3"><label class="btn secondary"><input type="checkbox" data-edit="member" data-id="${p.id}" ${p.member?'checked':''}> Abonnée</label><label class="btn secondary"><input type="checkbox" data-edit="confirmed" data-id="${p.id}" ${p.confirmed?'checked':''}> Confirmée</label>${p.plan==='cycle'?`<label class="btn secondary"><input type="checkbox" data-edit="cyclePaid" data-id="${p.id}" ${p.cyclePaid?'checked':''}> Payé</label>`:'<span></span>'}</div><div class="field"><label>Note pratique / santé</label><input data-edit="notes" data-id="${p.id}" value="${esc(p.notes)}"></div>${p.phone||p.email?`<div class="contactline">${p.phone?`<a href="tel:${esc(cleanPhone(p.phone))}">📞 Appeler</a>${waPhone(p.phone)?`<a target="_blank" rel="noopener" href="https://wa.me/${waPhone(p.phone)}">💬 WhatsApp</a>`:''}`:''}${p.email?`<a href="mailto:${esc(p.email)}">✉️ E-mail</a>`:''}</div>`:''}<button class="btn danger small" data-delete="${p.id}" style="margin-top:10px">Supprimer</button></div></details></div>`).join('');el.querySelectorAll('[data-edit]').forEach(x=>x.addEventListener('change',handleEdit));el.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const p=byId(b.dataset.delete);if(p&&confirm('Supprimer '+p.name+' ?')){data.people=data.people.filter(x=>x.id!==p.id);save();renderEverything()}}))}
+function handleEdit(e){const p=byId(e.target.dataset.id),k=e.target.dataset.edit;if(!p)return;if(k==='member'){p.member=e.target.checked;p.fee=feeFor(p.plan,p.member)}else if(k==='confirmed')p.confirmed=e.target.checked;else if(k==='cyclePaid'){p.cyclePaid=e.target.checked;if(!p.cyclePaid){p.cyclePaymentMethod='';p.cyclePaymentDate=''}}else if(k==='plan'){p.plan=e.target.value;p.fee=feeFor(p.plan,p.member)}else p[k]=e.target.value;save();renderEverything()}
+
+function renderMatrix(){const ps=[...data.people].sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name,'fr')),t=document.getElementById('matrix');let html='<thead><tr><th>Participante</th>'+SESSIONS.map(s=>`<th>${esc(s.short)}</th>`).join('')+'</tr></thead><tbody>';for(const p of ps){html+=`<tr><td><b>${esc(p.name)}</b><br><span style="color:var(--muted)">${p.group} h · ${p.plan==='cycle'?'cycle':'unité'}</span></td>`;for(const s of SESSIONS){html+=`<td><input type="checkbox" data-m="att" data-id="${p.id}" data-s="${s.id}" ${p.attendance[s.id]?'checked':''}>${p.plan==='unit'?`<br><label style="font-size:9px;color:var(--muted)"><input type="checkbox" data-m="pay" data-id="${p.id}" data-s="${s.id}" ${p.unitPaid[s.id]?'checked':''}> €</label>`:''}</td>`}html+='</tr>'}html+='</tbody>';t.innerHTML=html;t.querySelectorAll('input').forEach(x=>x.addEventListener('change',e=>{const p=byId(e.target.dataset.id),sid=e.target.dataset.s;if(!p)return;if(e.target.dataset.m==='att')p.attendance[sid]=e.target.checked;else{p.unitPaid[sid]=e.target.checked;if(!e.target.checked)p.unitPaymentMethod[sid]=''}save();renderEverything()}))}
+
+function renderEverything(){renderInstallNotice();renderTopSummary();renderToday();renderDateSummary();renderGroupSummary();renderFinance();renderPeople();renderMatrix()}
+function switchView(v){document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));document.getElementById('view-'+v).classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function nearestSession(){const today=new Date();today.setHours(0,0,0,0);let best=SESSIONS.filter(s=>!s.makeup).map(s=>({s,d:new Date(s.date+'T00:00:00')})).sort((a,b)=>Math.abs(a.d-today)-Math.abs(b.d-today))[0];return best?best.s.id:'s1'}
+function csvQ(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function download(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+
+const sess=document.getElementById('sessionSelect');sess.innerHTML=SESSIONS.map(s=>`<option value="${s.id}">${esc(s.label)}</option>`).join('');sess.value=data.selectedSession;sess.addEventListener('change',()=>{data.selectedSession=sess.value;save();renderEverything()});
+document.getElementById('jumpToday').addEventListener('click',()=>{data.selectedSession=nearestSession();sess.value=data.selectedSession;save();renderEverything()});
+document.querySelectorAll('#groupSegment button').forEach(b=>b.addEventListener('click',()=>{data.selectedGroup=b.dataset.group;save();renderEverything()}));
+document.getElementById('allPresent').addEventListener('click',()=>{peopleForGroup().forEach(p=>p.attendance[data.selectedSession]=true);save();renderEverything()});
+document.getElementById('nonePresent').addEventListener('click',()=>{if(confirm('Tout décocher pour ce groupe et cette séance ?')){peopleForGroup().forEach(p=>p.attendance[data.selectedSession]=false);save();renderEverything()}});
+document.getElementById('addPerson').addEventListener('click',()=>{const name=document.getElementById('addName').value.trim();if(!name)return alert('Indiquez le nom et le prénom.');const plan=document.getElementById('addPlan').value,member=document.getElementById('addMember').checked;data.people.push(normalizePerson({name,group:document.getElementById('addGroup').value,plan,member,phone:document.getElementById('addPhone').value.trim(),email:document.getElementById('addEmail').value.trim(),notes:document.getElementById('addNote').value.trim()}));['addName','addPhone','addEmail','addNote'].forEach(id=>document.getElementById(id).value='');document.getElementById('addMember').checked=false;save();renderEverything();alert(name+' a été ajoutée.')});
+document.getElementById('peopleSearch').addEventListener('input',renderPeople);
+document.querySelectorAll('.bottomnav button').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+document.querySelectorAll('[data-paymethod]').forEach(b=>b.addEventListener('click',()=>setPayment(b.dataset.paymethod)));
+document.getElementById('payCancel').addEventListener('click',closePayment);document.getElementById('payModal').addEventListener('click',e=>{if(e.target.id==='payModal')closePayment()});
+document.getElementById('exportCsv').addEventListener('click',()=>{const rows=[['Nom','Groupe','Formule','Abonnée','Confirmée','Tarif','Cycle payé','Mode paiement cycle','Date paiement cycle',...SESSIONS.map(s=>s.label)]];data.people.forEach(p=>rows.push([p.name,p.group,p.plan==='cycle'?'Cycle':'À la séance',p.member?'Oui':'Non',p.confirmed?'Oui':'Non',p.fee,p.cyclePaid?'Oui':'Non',p.cyclePaymentMethod,p.cyclePaymentDate?sessionLabel(p.cyclePaymentDate):'',...SESSIONS.map(s=>p.attendance[s.id]?'Présente':'')]));download('full_body_training.csv','\ufeff'+rows.map(r=>r.map(csvQ).join(';')).join('\n'),'text/csv;charset=utf-8')});
+document.getElementById('backupBtn').addEventListener('click',()=>download('full_body_training_sauvegarde.json',JSON.stringify(data,null,2),'application/json'));
+function restoreFile(f){const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.people))throw new Error('format');data=migrateOld(x);save();sess.value=data.selectedSession;renderEverything();alert('Liste restaurée avec succès.')}catch(err){alert('Fichier de sauvegarde invalide.')}};r.readAsText(f)}
+document.getElementById('restoreInput').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreFile(f)});
+document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Réinitialiser toutes les données de l’application ? Cette action est irréversible sans sauvegarde.')){data=clone(EMPTY_STATE);save();sess.value='s1';renderEverything()}});
+document.getElementById('installNotice').addEventListener('click',()=>{sessionStorage.setItem('fbt_install_dismissed','1');renderInstallNotice()});
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+renderEverything();
+</script>
+</body>
+</html>
